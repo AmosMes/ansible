@@ -1,0 +1,39 @@
+---
+- name: Creating ansible user for Ansible use
+  hosts: stream.example.com
+  become: true
+  tasks:
+  - name: Create ansible user
+    user:
+      name: ansible
+      shell: /bin/bash
+      groups: wheel
+      expires: -1
+      state: present
+
+  - name: Create sudo file for ansible
+    file:
+      path: /etc/sudoers.d/ansible
+      state: touch
+
+  - name: Add content to ansible file in sudoers
+    lineinfile:
+      path: /etc/sudoers.d/ansible
+      line: 'ansible ALL=(ALL) NOPASSWD: ALL'
+
+  - name: Create .ssh directory for ansible user
+    file:
+      path: /home/ansible/.ssh
+      state: directory
+      mode: '0700'
+      owner: ansible
+      group: ansible
+
+  - name: Copy the local ansible ssh rsa_id.pub to the remote machine and rename to authorized_keys
+    copy:
+      src: /home/ansible/.ssh/id_rsa.pub
+      dest: /home/ansible/.ssh/authorized_keys
+      owner: ansible
+      group: ansible
+      mode: '0644'
+      backup: yes
