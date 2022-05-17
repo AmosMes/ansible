@@ -3,6 +3,7 @@
   hosts: stream.example.com
   become: true
   tasks:
+# Using the user module to create the ansible user as a privileged user that will never expire.
   - name: Create ansible user
     user:
       name: ansible
@@ -10,7 +11,7 @@
       groups: wheel
       expires: -1
       state: present
-
+# Creating a sudo file for the ansible user with content so it will not prompt for password.
   - name: Create sudo file for ansible
     file:
       path: /etc/sudoers.d/ansible
@@ -20,7 +21,7 @@
     lineinfile:
       path: /etc/sudoers.d/ansible
       line: 'ansible ALL=(ALL) NOPASSWD: ALL'
-
+# Creating the .ssh directory with the correct permissions.
   - name: Create .ssh directory for ansible user
     file:
       path: /home/ansible/.ssh
@@ -28,7 +29,7 @@
       mode: '0700'
       owner: ansible
       group: ansible
-
+# Copy the id_rsa.pud and renaming it to authorized_keys so ansible can use a key authentication.
   - name: Copy the local ansible ssh rsa_id.pub to the remote machine and rename to authorized_keys
     copy:
       src: /home/ansible/.ssh/id_rsa.pub
